@@ -1,0 +1,10 @@
+SCAlable moDULarized *nIX
+
+- source-based package management system
+- manages different software versions depending on
+  - different used library versions
+  - different compilers / compiler options
+- shell environment management like "modules"
+- usage intended as both
+  - additional package management system for other *nix distributions and
+  - stand-alone source-based *nix distribution
