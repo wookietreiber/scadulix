@@ -24,6 +24,9 @@
  ****************************************************************************/
 
 
+import scala.util.Properties
+import akka.config.Configuration
+
 package object scadulix {
 
   // -------------------------------------------------------------------
@@ -38,45 +41,61 @@ package object scadulix {
 
   type URL = java.net.URL
 
-  val Properties = scala.util.Properties
-
   val Source = scala.io.Source
 
   val EventHandler = akka.event.EventHandler
 
   // -------------------------------------------------------------------
-  // implicit conversions
-  // -------------------------------------------------------------------
-
-  implicit def string2File(s: String) = new File(s)
-  implicit def string2URI(s: String) = new URI(s)
-  implicit def string2URL(s: String) = new URL(s)
-
-  // -------------------------------------------------------------------
   // configuration
   // -------------------------------------------------------------------
 
-  // TODO use envOrElse or propOrElse later
-  lazy val         tmpDir = verifiedDir(Properties.tmpDir)
-  lazy val sourceCacheDir = verifiedDir("/var/cache/sources")
-  lazy val       buildDir = verifiedDir("/usr/src")
-
-  val bar = (s: String) => s match {
-    case License.ByOrg(seq @ _*) => seq
-    case License.ByName(license) => List(license)
-    case s => List(License(s, "https://github.com/login"))
+  /** Returns the current configuration. */
+  def conf = Configuration fromFile {
+    Properties propOrElse("scadulix.conf", "/etc/scadulix/scadulix.conf")
   }
 
-  // Source.fromURL(getClass.getResource("/conf/scadulix-default.conf"))
+  /** Returns the temporary file directory. */
+  def tmpDir = verifiedDir {
+    conf getString ( "scadulix.tmpDir", Properties.tmpDir )
+  }
 
-  def acceptedByConf: Seq[String] = Nil
-  def rejectedByConf: Seq[String] = Nil
+  /** Returns the base prefix directory. */
+  def prefix = verifiedDir {
+    conf getString ( "scadulix.prefix", "/usr" )
+  }
 
-  def acceptedLicenses: Seq[License] = acceptedByConf flatMap bar
-  def rejectedLicenses: Seq[License] = rejectedByConf flatMap bar
+  /** Returns the base cache directory. */
+  def cacheDir = verifiedDir {
+    conf getString ( "scadulix.cacheDir", "/var/cache" )
+  }
 
-  val moduleFilter = (mods: Seq[Module]) => {
-    mods/*.view*/ filter { mod =>
+  /** Returns the source cache directory. */
+  def sourceCache = verifiedDir {
+    conf getString ( "scadulix.sourceCache", cacheDir + "/sources" )
+  }
+
+  /** Returns the directory where modules are built. */
+  def buildDir = verifiedDir {
+    conf getString ( "scadulix.buildDir", prefix + "/src" )
+  }
+
+  /** Optionally returns licenses by name and by organisation. */
+  private val licenseExtractors = (s: String) => s match {
+    case License.ByName(license) => List(license)
+    case License.ByOrg(seq @ _*) => seq
+  }
+
+  /** Returns accepted licenses. */
+  def acceptedLicenses: Seq[License] =
+    conf getList "scadulix.licenses.accepted" flatMap licenseExtractors
+
+  /** Returns rejected licenses. */
+  def rejectedLicenses: Seq[License] =
+    conf getList "scadulix.licenses.rejected" flatMap licenseExtractors
+
+  /** Filters the modules by accepted and rejected licenses. */
+  val licenseFilter = (mods: Seq[Module]) => {
+    mods filter { mod =>
       acceptedLicenses contains mod.licenses
     } filterNot { mod =>
       rejectedLicenses contains mod.licenses
@@ -106,11 +125,21 @@ package object scadulix {
         sys.error(dir + " creation failed.")
   }
 
-  def managed[T <: { def close() },U](resource: T)(handle: T => U): U = {
+  /** Closes the resource after handling it. */
+  def managed[A <: { def close() },B](resource: A)(handle: A => B) = {
     try {
-      return handle(resource)
+      handle(resource)
     } finally {
       resource.close()
     }
   }
+
+  // -------------------------------------------------------------------
+  // implicit conversions
+  // -------------------------------------------------------------------
+
+  implicit def string2File(s: String): File = new File(s)
+  implicit def string2URI(s: String): URI = new URI(s)
+  implicit def string2URL(s: String): URL = new URL(s)
+
 }
