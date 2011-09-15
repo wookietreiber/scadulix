@@ -25,9 +25,9 @@
 
 
 import scala.util.Properties
-import akka.config.Configuration
+import scalax.conf.Configured
 
-package object scadulix {
+package object scadulix extends Configured ( "scadulix" ) {
 
   // -------------------------------------------------------------------
   // aliases
@@ -49,34 +49,29 @@ package object scadulix {
   // configuration
   // -------------------------------------------------------------------
 
-  /** Returns the current configuration. */
-  def conf = Configuration fromFile {
-    Properties propOrElse("scadulix.conf", "/etc/scadulix/scadulix.conf")
-  }
-
   /** Returns the temporary file directory. */
   def tmpDir = verifiedDir {
-    conf getString ( "scadulix.tmpDir", Properties.tmpDir )
+    Configuration getString ( "scadulix.tmpDir", Properties.tmpDir )
   }
 
   /** Returns the base prefix directory. */
   def prefix = verifiedDir {
-    conf getString ( "scadulix.prefix", "/usr" )
+    Configuration getString ( "scadulix.prefix", "/usr" )
   }
 
   /** Returns the base cache directory. */
   def cacheDir = verifiedDir {
-    conf getString ( "scadulix.cacheDir", "/var/cache" )
+    Configuration getString ( "scadulix.cacheDir", "/var/cache" )
   }
 
   /** Returns the source cache directory. */
   def sourceCache = verifiedDir {
-    conf getString ( "scadulix.sourceCache", cacheDir + "/sources" )
+    Configuration getString ( "scadulix.sourceCache", cacheDir + "/sources" )
   }
 
   /** Returns the directory where modules are built. */
   def buildDir = verifiedDir {
-    conf getString ( "scadulix.buildDir", prefix + "/src" )
+    Configuration getString ( "scadulix.buildDir", prefix + "/src" )
   }
 
   /** Optionally returns licenses by name and by organisation. */
@@ -87,11 +82,11 @@ package object scadulix {
 
   /** Returns accepted licenses. */
   def acceptedLicenses: Seq[License] =
-    conf getList "scadulix.licenses.accepted" flatMap licenseExtractors
+    Configuration getList "scadulix.licenses.accepted" flatMap licenseExtractors
 
   /** Returns rejected licenses. */
   def rejectedLicenses: Seq[License] =
-    conf getList "scadulix.licenses.rejected" flatMap licenseExtractors
+    Configuration getList "scadulix.licenses.rejected" flatMap licenseExtractors
 
   /** Filters the modules by accepted and rejected licenses. */
   val licenseFilter = (mods: Seq[Module]) => {

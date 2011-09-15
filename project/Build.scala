@@ -1,6 +1,10 @@
 import sbt._
 import Keys._
 
+import Resolvers._
+import Dependencies._
+import BuildSettings._
+
 object BuildSettings {
   val buildOrganization = "scadulix"
   val buildVersion      = "0.0.1"
@@ -15,9 +19,6 @@ object BuildSettings {
 }
 
 object ScadulixBuild extends Build {
-  import Resolvers._
-  import Dependencies._
-  import BuildSettings._
 
   // -----------------------------------------------------------------------
   // project definitions
@@ -27,22 +28,19 @@ object ScadulixBuild extends Build {
     "scadulix",
     file ("."),
     settings = buildSettings ++ Seq (
-      libraryDependencies ++= Seq (akkaActor, specs2)/*,
-      initialCommands := """
-        import scadulix._
-      """*/
+      libraryDependencies ++= Seq ( akkaActor, specs2 )
     )
-  )
+  ) dependsOn ( scalaxconf )
 }
 
 object Dependencies {
-  import BuildSettings._
 
   // -----------------------------------------------------------------------
   // compile
   // -----------------------------------------------------------------------
 
-  val akkaActor = "se.scalablesolutions.akka" % "akka-actor" % akkaVersion // Apache v2
+  val akkaActor = "se.scalablesolutions.akka" % "akka-actor" % akkaVersion
+  val scalaxconf = uri ( "git://github.com/wookietreiber/scalaxconf.git" )
 
   // -----------------------------------------------------------------------
   // test
