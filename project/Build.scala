@@ -9,7 +9,8 @@ object BuildSettings {
   val buildOrganization = "scadulix"
   val buildVersion      = "0.0.1"
   val buildScalaVersion = "2.9.1"
-  val akkaVersion       = "1.1.3"
+  val akkaVersion       = "1.2"
+  val latest            = "latest.integration"
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
@@ -24,13 +25,11 @@ object ScadulixBuild extends Build {
   // project definitions
   // -----------------------------------------------------------------------
 
-  lazy val scadulix = Project (
-    "scadulix",
-    file ("."),
+  lazy val scadulix = Project ( "scadulix", file ("."),
     settings = buildSettings ++ Seq (
-      libraryDependencies ++= Seq ( akkaActor, specs2 )
+      libraryDependencies ++= Seq ( actor, conf, specs2 )
     )
-  ) dependsOn ( scalaxconf )
+  )
 }
 
 object Dependencies {
@@ -39,14 +38,15 @@ object Dependencies {
   // compile
   // -----------------------------------------------------------------------
 
-  val akkaActor = "se.scalablesolutions.akka" % "akka-actor" % akkaVersion
-  val scalaxconf = uri ( "git://github.com/wookietreiber/scalaxconf.git" )
+  val actor = "se.scalablesolutions.akka"      %  "akka-actor" % akkaVersion
+  val conf  = "com.github.wookietreiber.scf4s" %% "scf4s"      % latest
 
   // -----------------------------------------------------------------------
   // test
   // -----------------------------------------------------------------------
 
   val specs2 = "org.specs2" %% "specs2" % "1.6.1" % "test"
+
 }
 
 object Resolvers {

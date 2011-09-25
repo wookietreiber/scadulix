@@ -24,10 +24,11 @@
  ****************************************************************************/
 
 
-import scala.util.Properties
-import scalax.conf.Configured
+import scf4s._
 
-package object scadulix extends Configured ( "scadulix" ) {
+package object scadulix extends Configured with AppHome {
+
+  override lazy val appName = "scadulix"
 
   // -------------------------------------------------------------------
   // aliases
