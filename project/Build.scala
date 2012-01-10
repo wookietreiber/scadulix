@@ -6,7 +6,7 @@ import Dependencies._
 import BuildSettings._
 
 object BuildSettings {
-  val buildOrganization = "scadulix"
+  val buildOrganization = "com.github.scadulix"
   val buildVersion      = "0.0.1"
   val buildScalaVersion = "2.9.1"
   val akkaVersion       = "1.2"
@@ -38,14 +38,14 @@ object Dependencies {
   // compile
   // -----------------------------------------------------------------------
 
-  val actor = "se.scalablesolutions.akka"      %  "akka-actor" % akkaVersion
-  val conf  = "com.github.wookietreiber.scf4s" %% "scf4s"      % latest
+  val actor = "se.scalablesolutions.akka" %  "akka-actor" % akkaVersion
+  val conf  = "com.github.scf4s"          %% "scf4s"      % latest
 
   // -----------------------------------------------------------------------
   // test
   // -----------------------------------------------------------------------
 
-  val specs2 = "org.specs2" %% "specs2" % "1.6.1" % "test"
+  val specs2 = "org.specs2" %% "specs2" % "1.7.1" % "test"
 
 }
 
